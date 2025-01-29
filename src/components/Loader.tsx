@@ -11,7 +11,7 @@ const Loader: React.FC = () => {
 
         {/* Loader Text */}
         <p className="text-white text-lg font-medium animate-pulse">
-          Your distance pricing is being calculated...
+          Please wait! Processing...
         </p>
       </div>
     </div>
