@@ -3,17 +3,25 @@
 "use client";
 
 import Loader from "@/components/Loader";
+import ReservationCheckout from "@/components/ReservationCheckout/ReservationCheckout";
+import { carBrands } from "@/constants";
+import { setRoute } from "@/redux/feature/route/routeSlice";
+import { useAppDispatch } from "@/redux/hook";
 import getBaseUrl from "@/utils/getBaseUrl";
 import { useGoogleMapsLoader } from "@/utils/googleApiLoader";
 import {
   DirectionsRenderer,
   GoogleMap,
   Marker,
-  StandaloneSearchBox
+  StandaloneSearchBox,
 } from "@react-google-maps/api";
 import axios from "axios";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MdLocationPin } from "react-icons/md";
+import { FaCar, FaUsers } from "react-icons/fa";
+import { LuBaggageClaim } from "react-icons/lu";
+import { MdLocationPin, MdOutlineDateRange } from "react-icons/md";
+import { toast } from "react-toastify";
 
 const containerStyle = {
   width: "100%",
@@ -26,6 +34,13 @@ const center = {
 };
 
 export default function DistanceCalculator() {
+  const dispatch = useAppDispatch();
+  const [reservationCheckout, setReservationCheckout] = useState(false);
+  const [startingDate, setStartingDate] = useState<string>("");
+  console.log("starting date: ", startingDate);
+  const [vehicle, setVehicle] = useState<string>("");
+  const [passenger, setPassenger] = useState(0);
+  const [baggages, setBaggages] = useState(0);
   const [isModalOpen, setModalOpen] = useState(false);
   const toggleModal = () => setModalOpen(!isModalOpen);
   const [loading, setLoading] = useState(false);
@@ -41,8 +56,12 @@ export default function DistanceCalculator() {
   const [response, setResponse] = useState<{
     startAddress: string;
     endAddress: string;
-    distance: string;
-    price: string;
+    distanceInKm: string;
+    durationInMinutes: string;
+    distance: number;
+    duration: number;
+    price: number;
+    priceInUSD: string;
   } | null>(null);
 
   // load google maps api
@@ -152,9 +171,6 @@ export default function DistanceCalculator() {
     ));
   };
 
-
-  
-
   if (!isLoaded) {
     return <div>Loading...</div>;
   }
@@ -200,6 +216,7 @@ export default function DistanceCalculator() {
     if (!from || !to || markers.length === 0) {
       return alert("Please select both starting and arrival addresses.");
     }
+
     setLoading(true);
     try {
       const response = await axios.post(
@@ -212,15 +229,49 @@ export default function DistanceCalculator() {
       console.log("Response:", response?.data?.data);
       if (!!response?.data?.success) {
         setResponse(response.data.data);
-        setFrom("");
-        setTo("");
-        setMarkers([]);
         setLoading(false);
         toggleModal();
       }
     } catch (error) {
       console.error("Error calculating distance:", error);
-      alert("Error calculating distance. Please try again later.");
+      toast.error("Error calculating distance. Please try again later.");
+    }
+  };
+
+  const handleContinueReservationProcess = () => {
+    if (
+      !from ||
+      !to ||
+      !markers.length ||
+      !vehicle ||
+      !startingDate ||
+      !response?.distanceInKm ||
+      !response?.durationInMinutes ||
+      !response?.price ||
+      !response.duration
+    ) {
+      return toast.error("Please provide valid information");
+    } else {
+      dispatch(
+        setRoute({
+          departureAddress: from,
+          arrivalAddress: to,
+          vehicle,
+          passenger,
+          baggage: baggages,
+          tripType: "One Way",
+          departureDate: startingDate,
+          travelTime: response.duration,
+          formatTravelTime: response.durationInMinutes,
+          distance: response.distance,
+          formatDistance: response.distanceInKm,
+          price: response.price,
+        })
+      );
+      setReservationCheckout(true);
+      setFrom("");
+      setTo("");
+      setMarkers([]);
     }
   };
 
@@ -228,15 +279,29 @@ export default function DistanceCalculator() {
     return <Loader />;
   }
 
+  if (reservationCheckout) {
+    return <ReservationCheckout />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 flex justify-center items-center">
       <div className="border rounded-md border-gray-600 w-full md:w-1/2 p-6 mx-auto bg-gray-900 flex flex-col text-white">
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          Distance Price Calculator
-        </h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold mb-6 text-center">
+            Distance Price Calculator
+          </h1>
+          <div className="flex justify-end items-center mb-3">
+            <Link
+              href={"/view-reservation"}
+              className="w-fit p-2 bg-[#6E8E59] text-white font-bold rounded-md"
+            >
+              View reservation data
+            </Link>
+          </div>
+        </div>
         <div className="grid grid-cols-4 gap-4 mb-6 ">
           {/* Starting Address */}
-          <div className="col-span-4">
+          <div className="col-span-3">
             <label className="block font-medium mb-1 text-center">
               Starting Address
             </label>
@@ -264,35 +329,36 @@ export default function DistanceCalculator() {
               </div>
             </div>
           </div>
-          {/* Arrival Address */}
-          {/* <div className="col-span-1">
+          {/* Vehicle */}
+          <div className="col-span-1">
             <label className="block font-medium mb-1 text-center">
-              Arrival Address
+              Vehicle
             </label>
             <div className="flex items-center">
               <div className="p-2 rounded bg-gray-700 border border-gray-600">
-                <MdLocationPin size={24} />
+                <FaCar size={24} />
               </div>
               <div className="w-full">
-                {isLoaded && (
-                  <StandaloneSearchBox
-                    onLoad={(ref) => (arrivalAddressRef.current = ref)}
-                    onPlacesChanged={handleOnArrivalAddressChanged}
-                  >
-                    <input
-                      type="text"
-                      placeholder="Click on map to set arrival point"
-                      // value={from}
-                      // readOnly
-                      className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
-                    />
-                  </StandaloneSearchBox>
-                )}
+                <select
+                  id="vehicle"
+                  className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                  value={vehicle}
+                  onChange={(e) => setVehicle(e.target.value)}
+                >
+                  <option value="">Select a car brand...</option>
+                  {carBrands.map(
+                    (brand: { label: string; value: string }, index) => (
+                      <option key={index} value={brand.value}>
+                        {brand.label}
+                      </option>
+                    )
+                  )}
+                </select>
               </div>
             </div>
-          </div> */}
+          </div>
           {/* Arrival Address */}
-          <div className="col-span-4">
+          <div className="col-span-3">
             <label className="block font-medium mb-1 text-center">
               Arrival Address
             </label>
@@ -320,7 +386,7 @@ export default function DistanceCalculator() {
             </div>
           </div>
           {/* Passengers */}
-          {/* <div className="col-span-1">
+          <div className="col-span-1">
             <label className="block font-medium mb-1 text-center">
               Passengers
             </label>
@@ -351,7 +417,95 @@ export default function DistanceCalculator() {
                 </button>
               </div>
             </div>
-          </div> */}
+          </div>
+          {/* Arrival Address */}
+          <div className="col-span-3">
+            <label className="block font-medium mb-1 text-center">
+              Date and time
+            </label>
+
+            <div className="flex items-center">
+              <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                <MdOutlineDateRange size={24} />
+              </div>
+              <div className="w-full">
+                <input
+                  type="datetime-local"
+                  placeholder="Click on map to set arrival point"
+                  value={startingDate}
+                  onChange={(e) => setStartingDate(e.target.value)}
+                  // readOnly
+                  className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center">
+                <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                  <MdOutlineDateRange size={24} />
+                </div>
+                <div className="w-full">
+                  <input
+                    type="date"
+                    placeholder="Click on map to set arrival point"
+                    value={startingDate}
+                    onChange={(e) => setStartingDate(e.target.value)}
+                    // readOnly
+                    className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center">
+                <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                  <HiClock size={24} />
+                </div>
+                <div className="w-full">
+                  <input
+                    type="time"
+                    placeholder="Click on map to set arrival point"
+                    value={startingTime}
+                    onChange={(e) => setStartingTime(e.target.value)}
+                    // readOnly
+                    className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div> */}
+          </div>
+          {/* Baggage */}
+          <div className="col-span-1">
+            <label className="block font-medium mb-1 text-center">
+              Baggage
+            </label>
+            <div className="flex items-center">
+              <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                <LuBaggageClaim size={24} />
+              </div>
+              <div className="flex items-center w-full">
+                <button
+                  type="button"
+                  onClick={() => setBaggages((prev) => Math.max(prev - 1, 0))}
+                  className="p-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-l border border-gray-600"
+                >
+                  -
+                </button>
+                <input
+                  type="text"
+                  value={baggages}
+                  readOnly
+                  className="w-full text-center p-2 bg-gray-700 border-t border-b border-gray-600 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setBaggages((prev) => prev + 1)}
+                  className="p-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-r border border-gray-600"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-center items-center mb-3">
@@ -363,7 +517,6 @@ export default function DistanceCalculator() {
             Estimate Calculate Price
           </button>
         </div>
-    
 
         {/* Modal */}
         {isModalOpen && (
@@ -391,12 +544,30 @@ export default function DistanceCalculator() {
                 </div>
                 <div className="border-b-[0.3px] border-[#FFFFFF4D] pb-2 space-y-1">
                   <p className="font-semibold">Distance :</p>
-                  <p className="text-gray-400">{response?.distance}</p>
+                  <p className="text-orange-400 font-bold">
+                    {response?.distanceInKm}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <p className="font-semibold">Price:</p>
-                  <p className="text-orange-400 font-bold">{response?.price}</p>
+                  <p className="text-orange-400 font-bold">
+                    {response?.priceInUSD}
+                  </p>
                 </div>
+                <div className="space-y-1">
+                  <p className="font-semibold">Duration:</p>
+                  <p className="text-orange-400 font-bold">
+                    {response?.durationInMinutes}
+                  </p>
+                </div>
+              </div>
+              <div className="flex justify-center items-center mt-4">
+                <button
+                  onClick={() => handleContinueReservationProcess()}
+                  className="px-4 block py-2 text-white font-semibold bg-green-600 rounded-lg shadow-md transition duration-300 hover:bg-green-700 active:scale-95"
+                >
+                  Continue Reservation Process
+                </button>
               </div>
             </div>
           </div>
