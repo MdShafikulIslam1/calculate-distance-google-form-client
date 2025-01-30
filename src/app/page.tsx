@@ -37,7 +37,6 @@ export default function DistanceCalculator() {
   const dispatch = useAppDispatch();
   const [reservationCheckout, setReservationCheckout] = useState(false);
   const [startingDate, setStartingDate] = useState<string>("");
-  console.log("starting date: ", startingDate);
   const [vehicle, setVehicle] = useState<string>("");
   const [passenger, setPassenger] = useState(0);
   const [baggages, setBaggages] = useState(0);
@@ -214,7 +213,7 @@ export default function DistanceCalculator() {
 
   const calculateDistance = async () => {
     if (!from || !to || markers.length === 0) {
-      return alert("Please select both starting and arrival addresses.");
+      return toast.error("Please select both starting and arrival addresses.");
     }
 
     setLoading(true);
@@ -280,7 +279,62 @@ export default function DistanceCalculator() {
   }
 
   if (reservationCheckout) {
-    return <ReservationCheckout />;
+    return (
+      <div className="bg-gray-100">
+        <div className="grid grid-cols-2 w-full md:w-1/2 mx-auto gap-4 text-black">
+          <ReservationCheckout />
+          {/* Google Map */}
+          <div className="w-full p-4  shadow-2xl">
+            <div className="h-2/5">
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={center}
+                zoom={8}
+                onClick={handleMapClick}
+              >
+                {renderMarkers()}
+                {renderDirectionRoute()}
+              </GoogleMap>
+            </div>
+            <h2 className="text-xl font-semibold my-4">Trip Details</h2>
+            <div className="space-y-1">
+              <p>
+                <span className="font-medium">Departure Address:</span>{" "}
+                {response?.startAddress}
+              </p>
+              <p>
+                <span className="font-medium">Arrival Address:</span>{" "}
+                {response?.endAddress}
+              </p>
+              <p>
+                <span className="font-medium">Vehicle:</span> {vehicle}
+              </p>
+              <p>
+                <span className="font-medium">Passengers:</span> {passenger}
+              </p>
+              <p>
+                <span className="font-medium">Luggage:</span> {baggages}
+              </p>
+              <p>
+                <span className="font-medium">Round Trip:</span> {"One Way"}
+              </p>
+              <p>
+                <span className="font-medium">Date and Time:</span>{" "}
+                {startingDate}
+              </p>
+              <p>
+                <span className="font-medium">Travel Time:</span>{" "}
+                {response?.durationInMinutes}
+              </p>
+              <p>
+                <span className="font-medium">Distance:</span>{" "}
+                {response?.distanceInKm}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
