@@ -35,6 +35,7 @@ const center = {
 
 export default function DistanceCalculator() {
   const dispatch = useAppDispatch();
+  const dateInputRef = useRef(null);
   const [reservationCheckout, setReservationCheckout] = useState(false);
   const [startingDate, setStartingDate] = useState<string>("");
   const [vehicle, setVehicle] = useState<string>("");
@@ -335,173 +336,170 @@ export default function DistanceCalculator() {
         </div>
       </div>
     );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-900 flex justify-center items-center">
-      <div className="border rounded-md border-gray-600 w-full md:w-1/2 p-6 mx-auto bg-gray-900 flex flex-col text-white">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold mb-6 text-center">
-            Distance Price Calculator
-          </h1>
-          <div className="flex justify-end items-center mb-3">
-            <Link
-              href={"/view-reservation"}
-              className="w-fit p-2 bg-[#6E8E59] text-white font-bold rounded-md"
-            >
-              View reservation data
-            </Link>
-          </div>
-        </div>
-        <div className="grid grid-cols-4 gap-4 mb-6 ">
-          {/* Starting Address */}
-          <div className="col-span-3">
-            <label className="block font-medium mb-1 text-center">
-              Starting Address
-            </label>
-            <div className="flex items-center">
-              <div className="p-2 rounded bg-gray-700 border border-gray-600">
-                <MdLocationPin size={24} />
-              </div>
-              <div className="w-full">
-                {isLoaded && (
-                  <StandaloneSearchBox
-                    onLoad={(ref) => (startAddressRef.current = ref)}
-                    onPlacesChanged={handleOnStartAddressChanged}
-                  >
-                    <input
-                      type="text"
-                      placeholder="Click on map to set starting point"
-                      value={from}
-                      onChange={(e) => setFrom(e.target.value)}
-                      // readOnly
-
-                      className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
-                    />
-                  </StandaloneSearchBox>
-                )}
-              </div>
+  } else {
+    return (
+      <div className="min-h-screen bg-gray-900 flex justify-center items-center">
+        <div className="border rounded-md border-gray-600 w-full md:w-1/2 p-6 mx-auto bg-gray-900 flex flex-col text-white">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold mb-6 text-center">
+              Distance Price Calculator
+            </h1>
+            <div className="flex justify-end items-center mb-3">
+              <Link
+                href={"/view-reservation"}
+                className="w-fit p-2 bg-[#6E8E59] text-white font-bold rounded-md"
+              >
+                View reservation data
+              </Link>
             </div>
           </div>
-          {/* Vehicle */}
-          <div className="col-span-1">
-            <label className="block font-medium mb-1 text-center">
-              Vehicle
-            </label>
-            <div className="flex items-center">
-              <div className="p-2 rounded bg-gray-700 border border-gray-600">
-                <FaCar size={24} />
-              </div>
-              <div className="w-full">
-                <select
-                  id="vehicle"
-                  className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none"
-                  value={vehicle}
-                  onChange={(e) => setVehicle(e.target.value)}
-                >
-                  <option value="">Select a car brand...</option>
-                  {carBrands.map(
-                    (brand: { label: string; value: string }, index) => (
-                      <option key={index} value={brand.value}>
-                        {brand.label}
-                      </option>
-                    )
+          <div className="grid grid-cols-4 gap-4 mb-6 ">
+            {/* Starting Address */}
+            <div className="col-span-3">
+              <label className="block font-medium mb-1 text-center">
+                Starting Address
+              </label>
+              <div className="flex items-center">
+                <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                  <MdLocationPin size={24} />
+                </div>
+                <div className="w-full">
+                  {isLoaded && (
+                    <StandaloneSearchBox
+                      onLoad={(ref) => (startAddressRef.current = ref)}
+                      onPlacesChanged={handleOnStartAddressChanged}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Click on map to set starting point"
+                        value={from}
+                        onChange={(e) => setFrom(e.target.value)}
+                        // readOnly
+
+                        className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                      />
+                    </StandaloneSearchBox>
                   )}
-                </select>
+                </div>
               </div>
             </div>
-          </div>
-          {/* Arrival Address */}
-          <div className="col-span-3">
-            <label className="block font-medium mb-1 text-center">
-              Arrival Address
-            </label>
-            <div className="flex items-center">
-              <div className="p-2 rounded bg-gray-700 border border-gray-600">
-                <MdLocationPin size={24} />
-              </div>
-              <div className="w-full">
-                {isLoaded && (
-                  <StandaloneSearchBox
-                    onLoad={(ref) => (arrivalAddressRef.current = ref)}
-                    onPlacesChanged={handleOnArrivalAddressChanged}
+            {/* Vehicle */}
+            <div className="col-span-1">
+              <label className="block font-medium mb-1 text-center">
+                Vehicle
+              </label>
+              <div className="flex items-center">
+                <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                  <FaCar size={24} />
+                </div>
+                <div className="w-full">
+                  <select
+                    id="vehicle"
+                    className="w-full p-3 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                    value={vehicle}
+                    onChange={(e) => setVehicle(e.target.value)}
                   >
-                    <input
-                      type="text"
-                      placeholder="Click on map to set arrival point"
-                      value={to}
-                      onChange={(e) => setTo(e.target.value)}
-                      // readOnly
-                      className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
-                    />
-                  </StandaloneSearchBox>
-                )}
+                    <option value="">Select a car brand...</option>
+                    {carBrands.map(
+                      (brand: { label: string; value: string }, index) => (
+                        <option key={index} value={brand.value}>
+                          {brand.label}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
-          {/* Passengers */}
-          <div className="col-span-1">
-            <label className="block font-medium mb-1 text-center">
-              Passengers
-            </label>
-            <div className="flex items-center">
-              <div className="p-2 rounded bg-gray-700 border border-gray-600">
-                <FaUsers size={24} />
-              </div>
-              <div className="flex items-center w-full">
-                <button
-                  type="button"
-                  onClick={() => setPassenger((prev) => Math.max(prev - 1, 0))}
-                  className="p-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-l border border-gray-600"
-                >
-                  -
-                </button>
-                <input
-                  type="text"
-                  value={passenger}
-                  readOnly
-                  className="w-full text-center p-2 bg-gray-700 border-t border-b border-gray-600 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setPassenger((prev) => prev + 1)}
-                  className="p-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-r border border-gray-600"
-                >
-                  +
-                </button>
+            {/* Arrival Address */}
+            <div className="col-span-3">
+              <label className="block font-medium mb-1 text-center">
+                Arrival Address
+              </label>
+              <div className="flex items-center">
+                <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                  <MdLocationPin size={24} />
+                </div>
+                <div className="w-full">
+                  {isLoaded && (
+                    <StandaloneSearchBox
+                      onLoad={(ref) => (arrivalAddressRef.current = ref)}
+                      onPlacesChanged={handleOnArrivalAddressChanged}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Click on map to set arrival point"
+                        value={to}
+                        onChange={(e) => setTo(e.target.value)}
+                        // readOnly
+                        className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                      />
+                    </StandaloneSearchBox>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          {/* Arrival Address */}
-          <div className="col-span-3">
-            <label className="block font-medium mb-1 text-center">
-              Date and time
-            </label>
-
-            <div className="flex items-center">
-              <div className="p-2 rounded bg-gray-700 border border-gray-600">
-                <MdOutlineDateRange size={24} />
+            {/* Passengers */}
+            <div className="col-span-1">
+              <label className="block font-medium mb-1 text-center">
+                Passengers
+              </label>
+              <div className="flex items-center">
+                <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                  <FaUsers size={24} />
+                </div>
+                <div className="flex items-center w-full">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPassenger((prev) => Math.max(prev - 1, 0))
+                    }
+                    className="p-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-l border border-gray-600"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="text"
+                    value={passenger}
+                    readOnly
+                    className="w-full text-center p-2 bg-gray-700 border-t border-b border-gray-600 focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPassenger((prev) => prev + 1)}
+                    className="p-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-r border border-gray-600"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-              <div className="w-full">
+            </div>
+            {/* Arrival Address */}
+            <div className="col-span-3">
+              <label className="block font-medium mb-1 text-center">
+                Date and time
+              </label>
+              <div
+                className="flex items-center p-2 rounded bg-gray-700 border border-gray-600 cursor-pointer"
+                onClick={() => (dateInputRef.current as any)?.showPicker()}
+              >
+                <MdOutlineDateRange size={24} className="mr-2 text-white" />
                 <input
                   type="datetime-local"
-                  placeholder="Click on map to set arrival point"
+                  ref={dateInputRef}
                   value={startingDate}
                   onChange={(e) => setStartingDate(e.target.value)}
-                  // readOnly
-                  className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                  className="bg-gray-700 focus:outline-none w-full text-white"
                 />
               </div>
-            </div>
 
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <div className="p-2 rounded bg-gray-700 border border-gray-600">
                   <MdOutlineDateRange size={24} />
                 </div>
                 <div className="w-full">
                   <input
-                    type="date"
+                    type="datetime-local"
                     placeholder="Click on map to set arrival point"
                     value={startingDate}
                     onChange={(e) => setStartingDate(e.target.value)}
@@ -509,139 +507,157 @@ export default function DistanceCalculator() {
                     className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
                   />
                 </div>
-              </div>
+              </div> */}
+
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center">
+                  <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                    <MdOutlineDateRange size={24} />
+                  </div>
+                  <div className="w-full">
+                    <input
+                      type="date"
+                      placeholder="Click on map to set arrival point"
+                      value={startingDate}
+                      onChange={(e) => setStartingDate(e.target.value)}
+                      // readOnly
+                      className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <div className="p-2 rounded bg-gray-700 border border-gray-600">
+                    <HiClock size={24} />
+                  </div>
+                  <div className="w-full">
+                    <input
+                      type="time"
+                      placeholder="Click on map to set arrival point"
+                      value={startingTime}
+                      onChange={(e) => setStartingTime(e.target.value)}
+                      // readOnly
+                      className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div> */}
+            </div>
+            {/* Baggage */}
+            <div className="col-span-1">
+              <label className="block font-medium mb-1 text-center">
+                Baggage
+              </label>
               <div className="flex items-center">
                 <div className="p-2 rounded bg-gray-700 border border-gray-600">
-                  <HiClock size={24} />
+                  <LuBaggageClaim size={24} />
                 </div>
-                <div className="w-full">
+                <div className="flex items-center w-full">
+                  <button
+                    type="button"
+                    onClick={() => setBaggages((prev) => Math.max(prev - 1, 0))}
+                    className="p-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-l border border-gray-600"
+                  >
+                    -
+                  </button>
                   <input
-                    type="time"
-                    placeholder="Click on map to set arrival point"
-                    value={startingTime}
-                    onChange={(e) => setStartingTime(e.target.value)}
-                    // readOnly
-                    className="w-full p-2 rounded bg-gray-700 border border-gray-600 focus:outline-none"
+                    type="text"
+                    value={baggages}
+                    readOnly
+                    className="w-full text-center p-2 bg-gray-700 border-t border-b border-gray-600 focus:outline-none"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setBaggages((prev) => prev + 1)}
+                    className="p-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-r border border-gray-600"
+                  >
+                    +
+                  </button>
                 </div>
-              </div>
-            </div> */}
-          </div>
-          {/* Baggage */}
-          <div className="col-span-1">
-            <label className="block font-medium mb-1 text-center">
-              Baggage
-            </label>
-            <div className="flex items-center">
-              <div className="p-2 rounded bg-gray-700 border border-gray-600">
-                <LuBaggageClaim size={24} />
-              </div>
-              <div className="flex items-center w-full">
-                <button
-                  type="button"
-                  onClick={() => setBaggages((prev) => Math.max(prev - 1, 0))}
-                  className="p-2 bg-red-500 hover:bg-red-600 text-white font-bold rounded-l border border-gray-600"
-                >
-                  -
-                </button>
-                <input
-                  type="text"
-                  value={baggages}
-                  readOnly
-                  className="w-full text-center p-2 bg-gray-700 border-t border-b border-gray-600 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setBaggages((prev) => prev + 1)}
-                  className="p-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-r border border-gray-600"
-                >
-                  +
-                </button>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex justify-center items-center mb-3">
-          <button
-            type="button"
-            onClick={calculateDistance}
-            className="block w-fit p-2 bg-[#6E8E59] text-white font-bold rounded-md"
-          >
-            Estimate Calculate Price
-          </button>
-        </div>
+          <div className="flex justify-center items-center mb-3">
+            <button
+              type="button"
+              onClick={calculateDistance}
+              className="block w-fit p-2 bg-[#6E8E59] text-white font-bold rounded-md"
+            >
+              Estimate Calculate Price
+            </button>
+          </div>
 
-        {/* Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
-            <div className="bg-gray-700 text-white rounded-lg p-6 w-96">
-              <div className="flex justify-between items-center mb-2 pb-4 border-b-[0.3px] border-[#FFFFFF4D]">
-                <h2 className="text-lg font-bold">
-                  Calculate Distance with price
-                </h2>
-                <button
-                  className="text-xl font-bold hover:text-gray-300"
-                  onClick={toggleModal} // Close modal on click
-                >
-                  &times;
-                </button>
-              </div>
-              <div className="space-y-4">
-                <div className="border-b-[0.3px] border-[#FFFFFF4D] pb-2 space-y-1">
-                  <p className="font-semibold">Starting Address :</p>
-                  <p className="text-gray-400">{response?.startAddress}</p>
+          {/* Modal */}
+          {isModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-80">
+              <div className="bg-gray-700 text-white rounded-lg p-6 w-96">
+                <div className="flex justify-between items-center mb-2 pb-4 border-b-[0.3px] border-[#FFFFFF4D]">
+                  <h2 className="text-lg font-bold">
+                    Calculate Distance with price
+                  </h2>
+                  <button
+                    className="text-xl font-bold hover:text-gray-300"
+                    onClick={toggleModal} // Close modal on click
+                  >
+                    &times;
+                  </button>
                 </div>
-                <div className="space-y-1">
-                  <p className="font-semibold">Arrival Address:</p>
-                  <p className="text-gray-400">{response?.endAddress}</p>
+                <div className="space-y-4">
+                  <div className="border-b-[0.3px] border-[#FFFFFF4D] pb-2 space-y-1">
+                    <p className="font-semibold">Starting Address :</p>
+                    <p className="text-gray-400">{response?.startAddress}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-semibold">Arrival Address:</p>
+                    <p className="text-gray-400">{response?.endAddress}</p>
+                  </div>
+                  <div className="border-b-[0.3px] border-[#FFFFFF4D] pb-2 space-y-1">
+                    <p className="font-semibold">Distance :</p>
+                    <p className="text-orange-400 font-bold">
+                      {response?.distanceInKm}
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-semibold">Price:</p>
+                    <p className="text-orange-400 font-bold">
+                      {response?.priceInUSD}
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-semibold">Duration:</p>
+                    <p className="text-orange-400 font-bold">
+                      {response?.durationInMinutes}
+                    </p>
+                  </div>
                 </div>
-                <div className="border-b-[0.3px] border-[#FFFFFF4D] pb-2 space-y-1">
-                  <p className="font-semibold">Distance :</p>
-                  <p className="text-orange-400 font-bold">
-                    {response?.distanceInKm}
-                  </p>
+                <div className="flex justify-center items-center mt-4">
+                  <button
+                    onClick={() => handleContinueReservationProcess()}
+                    className="px-4 block py-2 text-white font-semibold bg-green-600 rounded-lg shadow-md transition duration-300 hover:bg-green-700 active:scale-95"
+                  >
+                    Continue Reservation Process
+                  </button>
                 </div>
-                <div className="space-y-1">
-                  <p className="font-semibold">Price:</p>
-                  <p className="text-orange-400 font-bold">
-                    {response?.priceInUSD}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="font-semibold">Duration:</p>
-                  <p className="text-orange-400 font-bold">
-                    {response?.durationInMinutes}
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-center items-center mt-4">
-                <button
-                  onClick={() => handleContinueReservationProcess()}
-                  className="px-4 block py-2 text-white font-semibold bg-green-600 rounded-lg shadow-md transition duration-300 hover:bg-green-700 active:scale-95"
-                >
-                  Continue Reservation Process
-                </button>
               </div>
             </div>
+          )}
+          {/* Google Map */}
+          <div className="col-span-4 h-96">
+            <span className="text-gray-100 text-sm mb-1 block">
+              Please select two addresses from the map.
+            </span>
+            <GoogleMap
+              mapContainerStyle={containerStyle}
+              center={center}
+              zoom={8}
+              onClick={handleMapClick}
+            >
+              {renderMarkers()}
+              {renderDirectionRoute()}
+            </GoogleMap>
           </div>
-        )}
-        {/* Google Map */}
-        <div className="col-span-4 h-96">
-          <span className="text-gray-100 text-sm mb-1 block">
-            Please select two addresses from the map.
-          </span>
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={8}
-            onClick={handleMapClick}
-          >
-            {renderMarkers()}
-            {renderDirectionRoute()}
-          </GoogleMap>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
