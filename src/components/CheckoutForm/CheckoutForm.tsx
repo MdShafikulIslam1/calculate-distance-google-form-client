@@ -3,6 +3,7 @@
 
 import { useCreateReservationMutation } from "@/redux/api/reservation";
 import { useAppSelector } from "@/redux/hook";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import Loader from "../Loader";
@@ -12,6 +13,7 @@ const CheckoutForm = () => {
   const { register, handleSubmit } = useForm();
   const [selectedPayment, setSelectedPayment] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const [createReservation] = useCreateReservationMutation();
 
@@ -25,7 +27,12 @@ const CheckoutForm = () => {
       }).unwrap();
       if (!!response.success) {
         setIsLoading(false);
-        window.location.href = response?.data?.stripeUrl;
+
+        if (response?.data?.stripeUrl) {
+          window.location.href = response?.data?.stripeUrl;
+        } else {
+          router.push("/success");
+        }
       }
     } catch (error) {
       console.log("Failed to create reservation", error);
